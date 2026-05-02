@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The System">
+<meta name="theme-color" content="#0A0A0A">
+<title>The System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg: #0A0A0A;
+    --bg2: #111111;
+    --bg3: #1A1A1A;
+    --border: #222222;
+    --text: #E5E5E5;
+    --muted: #888888;
+    --dim: #444444;
+    --him: #F97316;
+    --him-dim: #7C3100;
+    --her: #EC4899;
+    --her-dim: #831843;
+    --accent: #F97316;
+    --accent-dim: #7C3100;
+    --green: #22C55E;
+    --red: #EF4444;
+    --yellow: #F59E0B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    overscroll-behavior: none;
+  }
+
+  /* PERSON SWITCHER */
+  .person-bar {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .person-btn {
+    flex: 1;
+    padding: 14px 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .person-btn.him.active { color: var(--him); border-color: var(--him); }
+  .person-btn.her.active { color: var(--her); border-color: var(--her); }
+
+  /* HEADER */
+  .header {
+    padding: 28px 20px 22px;
+    border-bottom: 2px solid var(--accent);
+    background: linear-gradient(135deg, #111 55%, var(--accent-dim) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+    opacity: 0.4;
+  }
+  .header-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+  .header-title span { color: var(--accent); }
+  .header-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .stats-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid #2A2A2A;
+    border-radius: 8px;
+    padding: 8px 12px;
+    flex: 1 1 auto;
+    min-width: 90px;
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .injury-banner {
+    margin-top: 14px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid #7F1D1D;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #FCA5A5;
+    line-height: 1.6;
+  }
+  .injury-banner strong { color: #EF4444; letter-spacing: 1px; font-size: 10px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 45px;
+    z-index: 99;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px 4px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--dim);
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--accent); border-color: var(--accent); }
+
+  /* CONTENT */
+  .content { padding: 18px 16px 80px; }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .section-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 18px;
+  }
+  .section-sub span { color: var(--accent); }
+
+  /* ACCORDION */
+  .accordion {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .accordion-header {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    color: var(--text);
+    text-align: left;
+  }
+  .accordion-header-left { flex: 1; }
+  .acc-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .acc-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .acc-arrow {
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 10px;
+  }
+  .accordion-body { display: none; padding: 0 16px 16px; }
+  .accordion.open .accordion-body { display: block; }
+  .accordion.open .acc-arrow { transform: rotate(45deg); }
+
+  /* OPTION CARD */
+  .option-card {
+    background: #0D0D0D;
+    border: 1px solid #2A2A2A;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .option-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .option-item {
+    font-size: 13px;
+    color: #CCC;
+    padding: 3px 0 3px 12px;
+    border-left: 1px solid #333;
+    margin-bottom: 3px;
+  }
+  .dessert-card {
+    background: #0D0D0D;
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 4px;
+  }
+  .dessert-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #F59E0B;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .dessert-text { font-size: 13px; color: #CCC; }
+
+  /* EXERCISE ROW */
+  .exercise-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #1A1A1A;
+    padding: 10px 0;
+    gap: 10px;
+  }
+  .exercise-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .exercise-note { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .exercise-sets {
+    background: #0D0D0D;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* INJURY NOTE */
+  .injury-note {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #FCA5A5;
+    line-height: 1.6;
+  }
+  .workout-note {
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #AAA;
+    line-height: 1.6;
+    border: 1px solid #222;
+    background: #0D0D0D;
+  }
+
+  /* STAT HIGHLIGHT */
+  .highlight-card {
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .highlight-card.good { background: #0A1A0A; border: 1px solid #14532D; border-left: 3px solid var(--green); }
+  .highlight-card.bad { background: #1A0A0A; border: 1px solid #7F1D1D; border-left: 3px solid var(--red); }
+  .highlight-card.warn { background: #1A1400; border: 1px solid #713F12; border-left: 3px solid var(--yellow); }
+  .highlight-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; margin-bottom: 4px; }
+  .highlight-val { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .highlight-note { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* RULE CARD */
+  .rule-card {
+    display: flex;
+    gap: 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .rule-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+    color: #000;
+  }
+  .rule-text { font-size: 13px; color: #CCC; line-height: 1.7; padding-top: 2px; }
+
+  /* TOTALS */
+  .totals-card {
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 8px;
+  }
+  .totals-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .totals-val { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); margin-top: 4px; }
+  .totals-macro { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* CONTRACT */
+  .contract {
+    margin-top: 20px;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .contract-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; margin-bottom: 10px; }
+  .contract-text { font-size: 13px; color: var(--muted); line-height: 1.9; font-style: italic; margin-bottom: 16px; }
+  .contract-footer { border-top: 1px solid var(--border); padding-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 2px; }
+
+  /* ROADMAP */
+  .roadmap-card {
+    display: flex;
+    gap: 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .roadmap-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+    color: #000;
+  }
+  .roadmap-week { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; }
+  .roadmap-text { font-size: 13px; color: #CCC; line-height: 1.6; }
+
+  .bottom-line {
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 8px;
+  }
+  .bottom-line-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .bottom-line-text { font-size: 13px; color: #CCC; line-height: 1.8; }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- PERSON SWITCHER -->
+<div class="person-bar">
+  <button class="person-btn him active" onclick="switchPerson('him')">🔥 MY PLAN</button>
+  <button class="person-btn her" onclick="switchPerson('her')">💗 HER PLAN</button>
+</div>
+
+<!-- ======================== HIM ======================== -->
+<div id="plan-him">
+  <div class="header" style="--accent:#F97316;--accent-dim:#7C3100;">
+    <div class="header-label">Personalized · No Equipment · Knee-Safe</div>
+    <div class="header-title">THE SYSTEM<br><span>117.7kg → LEAN</span></div>
+    <div class="header-sub">23M · 5'11" · Yoga mat only · 3 meals/day</div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-label">Calories</div><div class="stat-val" style="color:#F97316">2,200 kcal</div></div>
+      <div class="stat-box"><div class="stat-label">Protein</div><div class="stat-val" style="color:#F97316">~130g</div></div>
+      <div class="stat-box"><div class="stat-label">Steps</div><div class="stat-val" style="color:#F97316">8–10k</div></div>
+      <div class="stat-box"><div class="stat-label">Water</div><div class="stat-val" style="color:#F97316">4L/day</div></div>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs-him">
+    <button class="tab-btn active" onclick="switchTab('him','diet')" id="him-tab-diet">🍽 Diet</button>
+    <button class="tab-btn" onclick="switchTab('him','workout')" id="him-tab-workout">🏋 Workout</button>
+    <button class="tab-btn" onclick="switchTab('him','progress')" id="him-tab-progress">📈 Progress</button>
+    <button class="tab-btn" onclick="switchTab('him','rules')" id="him-tab-rules">📋 Rules</button>
+  </div>
+
+  <!-- HIM DIET -->
+  <div class="content" id="him-diet">
+    <div class="section-sub"><span>2,200 kcal</span> · <span>~130g protein</span> · <span>3 meals · no snacks needed</span><br>Drink 500ml water before each meal. Lunch = biggest meal.</div>
+
+    <!-- Breakfast -->
+    <div class="accordion" style="border-left:3px solid #F97316">
+      <button class="accordion-header" onclick="toggle(this.parentElement)">
+        <div class="accordion-header-left">
+          <div class="acc-label" style="color:#F97316">Breakfast</div>
+          <div class="acc-sub">Within 1–2 hrs of waking · ~550 kcal · ~40g protein</div>
+        </div>
+        <div class="acc-arrow" style="color:#F97316">+</div>
+      </button>
+      <div class="accordion-body">
+        <div class="option-card"><div class="option-label" style="color:#F97316">Option A</div><div class="option-item">3 whole eggs (boiled/scrambled)</div><div class="option-item">50g bread (2 slices)</div><div class="option-item">100ml low-fat milk</div><div class="option-item">1 small fruit (banana/apple)</div><div class="option-item">Black coffee / green tea</div></div>
+        <div class="option-card"><div class="option-label" style="color:#F97316">Option B</div><div class="option-item">60g soya chunks (soaked & cooked)</div><div class="option-item">2 rotis (80g)</div><div class="option-item">100g curd</div><div class="option-item">Black coffee / green tea</div></div>
+        <div class="option-card"><div class="option-label" style="color:#F97316">Option C</div><div class="option-item">100g low-fat paneer bhurji</div><div class="option-item">50g bread / 1 roti</div><div class="option-item">100ml milk</div><div class="option-item">1 fruit</div></div>
+      </div>
+    </div>
+
+    <!-- Lunch -->
+    <div class="accordion" style="border-left:3px solid #10B981">
+      <button class="accordion-header" onclick="toggle(this.parentElement)">
+        <div class="accordion-header-left">
+          <div class="acc-label" style="color:#10B981">Lunch</div>
+          <div class="acc-sub">Afternoon · biggest meal · ~850 kcal · ~50g protein</div>
+        </div>
+        <div class="acc-arrow" style="color:#10B981">+</div>
+      </button>
+      <div class="accordion-body">
+        <div class="option-card"><div class="option-label" style="color:#10B981">Option A (Non-Veg)</div><div class="option-item">150–200g chicken breast (grilled/boiled)</div><div class="option-item">200g cooked rice</div><div class="option-item">Big bowl salad (cucumber, carrot, tomato, onion)</div><div class="option-item">100g curd</div><div class="option-item">3g ghee</div></div>
+        <div class="option-card"><div class="option-label" style="color:#10B981">Option B (Veg)</div><div class="option-item">200g dal (any)</div><div class="option-item">100g low-fat paneer</div><div class="option-item">1–2 rotis (60g)</div><div class="option-item">Big bowl salad</div><div class="option-item">5g ghee</div></div>
+        <div class="option-card"><div class="option-label" style="color:#10B981">Option C</div><div class="option-item">100g soya chunks curry</div><div class="option-item">200g cooked rice</div><div class="option-item">100g curd</div><div class="option-item">Salad on the side</div></div>
+      </div>
+    </div>
+
+    <!-- Dinner -->
+    <div class="accordion" style="border-left:3px solid #3B82F6">
+      <button class="accordion-header" onclick="toggle(this.parentElement)">
+        <div class="accordion-header-left">
+          <div class="acc-label" style="color:#3B82F6">Dinner</div>
+          <div class="acc-sub">2+ hrs before sleep · lighter · ~700 kcal · ~40g protein</div>
+        </div>
+        <div class="acc-arrow" style="color:#3B82F6">+</div>
+      </button>
+      <div class="accordion-body">
+        <div class="option-card"><div class="option-label" style="color:#3B82F6">Option A</div><div class="option-item">200g dal</div><div class="option-item">2 rotis (80g)</div><div class="option-item">100g curd</div><div class="option-item">Sabzi / mixed veggies</div><div class="option-item">3g ghee</div></div>
+        <div class="option-card"><div class="option-label" style="color:#3B82F6">Option B (Non-Veg)</div><div class="option-item">150g chicken</div><div class="option-item">150g cooked rice</div><div class="option-item">Mixed veggies stir fry</div><div class="option-item">100g curd</div></div>
+        <div class="option-card"><div class="option-label" style="color:#3B82F6">Option C</div><div class="option-item">50g soya chunks</div><div class="option-item">100g low-fat paneer</div><div class="option-item">2 rotis</div><div class="option-item">Big bowl salad</div></div>
+        <div class="dessert-card"><div class="dessert-label">🍫 Dessert (pick one)</div><div class="dessert-text">40g ice cream · OR · 25g dark chocolate · OR · 100g Greek yogurt</div></div>
+      </div>
+    </div>
+
+    <div class="totals-card" style="background:linear-gradient(135deg,#111,rgba(124,49,0,0.3));border:1px solid rgba(249,115,22,0.3)">
+      <div class="totals-label">Daily Total</div>
+      <div class="totals-val" style="color:#F97316">~2,100–2,200 kcal</div>
+      <div class="totals-macro">Protein ~130g · Carbs ~250g · Fat ~55g</div>
+    </div>
+  </div>
+
+  <!-- HIM WORKOUT -->
+  <div class="content hidden" id="him-workout">
+    <div class="section-sub">Yoga mat only · No jumping · Knee-safe<br><span>3 training days · 2 walking days · 2 rest days</span></div>
+
+    <div id="him-workout-days"></div>
+  </div>
+
+  <!-- HIM PROGRESS -->
+  <div class="content hidden" id="him-progress">
+    <div class="section-title">90-Day Roadmap</div>
+    <div class="section-sub">Realistic target: <span>8–12kg fat loss in 90 days</span><br>That's 105–110kg by day 90. Visceral fat drops significantly.</div>
+
+    <div class="roadmap-card"><div class="roadmap-num" style="background:#F97316">1</div><div><div class="roadmap-week" style="color:#F97316">Week 1–2</div><div class="roadmap-text">Wall push-ups · Glute bridges · Getting consistent. Form over everything.</div></div></div>
+    <div class="roadmap-card"><div class="roadmap-num" style="background:#F97316">2</div><div><div class="roadmap-week" style="color:#F97316">Week 3–4</div><div class="roadmap-text">Incline push-ups · Single-leg bridges · Aim for 8,000 steps daily.</div></div></div>
+    <div class="roadmap-card"><div class="roadmap-num" style="background:#F97316">3</div><div><div class="roadmap-week" style="color:#F97316">Week 5–8</div><div class="roadmap-text">Full push-ups (attempt) · Mountain climbers faster · 10,000 steps.</div></div></div>
+    <div class="roadmap-card"><div class="roadmap-num" style="background:#F97316">4</div><div><div class="roadmap-week" style="color:#F97316">Week 9–12</div><div class="roadmap-text">Consider joining a gym. Your knees will handle more load by now. Barbell work unlocked.</div></div></div>
+
+    <div class="bottom-line" style="background:rgba(34,197,94,0.07);border:1px solid #14532D;margin-top:16px">
+      <div class="bottom-line-label" style="color:#22C55E">🎯 Milestone: Hit 100kg</div>
+      <div class="bottom-line-text">At 100kg, squats, lunges and barbell work become safe. That's when results accelerate dramatically.</div>
+    </div>
+
+    <div class="bottom-line" style="background:rgba(239,68,68,0.08);border:1px solid #7F1D1D;margin-top:12px">
+      <div class="bottom-line-label" style="color:#EF4444">⚠ Priority #1</div>
+      <div class="bottom-line-text">Visceral fat at <strong>18.53% — DANGER</strong>. Every walk you take is directly attacking this number. Don't skip walking days.</div>
+    </div>
+  </div>
+
+  <!-- HIM RULES -->
+  <div class="content hidden" id="him-rules">
+    <div class="section-title">Non-Negotiables</div>
+    <div id="him-rules-list"></div>
+    <div class="contract" style="background:linear-gradient(135deg,#0A0A0A,#111);border:1px solid #F97316">
+      <div class="contract-title" style="color:#F97316">The Contract</div>
+      <div class="contract-text">"I understand progress is not linear.<br>I will not quit when motivation dies.<br>I am building a lifestyle, not fixing a phase."</div>
+      <div class="contract-footer">90 DAYS · NO EXCUSES · JUST RESULTS</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== HER ======================== -->
+<div id="plan-her" class="hidden">
+  <div class="header" style="--accent:#EC4899;--accent-dim:#831843;">
+    <div class="header-label">Injury-Safe · No Equipment · Floor-Based</div>
+    <div class="header-title" style="font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1;letter-spacing:2px">THE SYSTEM<br><span style="color:#EC4899">70.6kg → LEAN</span></div>
+    <div class="header-sub">27F · 5'3" · Knee + ankle injury · Yoga mat · 3 meals/day</div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-label">Calories</div><div class="stat-val" style="color:#EC4899">1,650 kcal</div></div>
+      <div class="stat-box"><div class="stat-label">Protein</div><div class="stat-val" style="color:#EC4899">~95g</div></div>
+      <div class="stat-box"><div class="stat-label">Steps</div><div class="stat-val" style="color:#EC4899">4–5k</div></div>
+      <div class="stat-box"><div class="stat-label">Water</div><div class="stat-val" style="color:#EC4899">3L/day</div></div>
+    </div>
+    <div class="injury-banner"><strong>⚠ Injury Protocol Active</strong>Knee + ankle injury. All workouts are floor-based. Walks capped at 30 mins on flat ground only. Never train through joint pain.</div>
+  </div>
+
+  <div class="tabs" id="tabs-her">
+    <button class="tab-btn active" onclick="switchTab('her','stats')" id="her-tab-stats" style="color:#EC4899;border-color:#EC4899">📊 Stats</button>
+    <button class="tab-btn" onclick="switchTab('her','diet')" id="her-tab-diet">🍽 Diet</button>
+    <button class="tab-btn" onclick="switchTab('her','workout')" id="her-tab-workout">🏋 Workout</button>
+    <button class="tab-btn" onclick="switchTab('her','rules')" id="her-tab-rules">📋 Rules</button>
+  </div>
+
+  <!-- HER STATS -->
+  <div class="content" id="her-stats">
+    <div class="section-title" style="color:#EC4899">What Your Scan Actually Means</div>
+    <div class="section-sub" style="margin-bottom:16px">The scale labelled you "Obese" — that's misleading. Here's the real picture:</div>
+
+    <div class="highlight-card good"><div class="highlight-tag" style="color:#22C55E">✅ Body Fat</div><div class="highlight-val">21.77% — OPTIMAL</div><div class="highlight-note">The scale says obese but body fat % is actually healthy. This is a weight + visceral fat issue, not a body composition crisis.</div></div>
+    <div class="highlight-card good"><div class="highlight-tag" style="color:#22C55E">✅ Protein Mass</div><div class="highlight-val">17.84 kg — EXCELLENT</div><div class="highlight-note">She's already eating enough protein. Just maintain this.</div></div>
+    <div class="highlight-card warn"><div class="highlight-tag" style="color:#F59E0B">⚠️ Visceral Fat</div><div class="highlight-val">10.23% — ALERT</div><div class="highlight-note">Not at danger level, but needs attention. Calorie deficit + floor training will reduce this effectively.</div></div>
+    <div class="highlight-card bad"><div class="highlight-tag" style="color:#EF4444">⚠️ Subcutaneous Fat</div><div class="highlight-val">18.76% — HIGH</div><div class="highlight-note">Fat under the skin. Responds well to strength training + calorie deficit — even mat-based training counts.</div></div>
+    <div class="highlight-card bad"><div class="highlight-tag" style="color:#EF4444">🦵 Knee + Ankle Injury</div><div class="highlight-val">Injury protocol active</div><div class="highlight-note">All exercises are floor-based. No jumping, no standing holds, no pressure through injured joints. Short walks only on flat ground.</div></div>
+
+    <div class="bottom-line" style="background:linear-gradient(135deg,#0A0A0A,#1a0a1a);border:1px solid rgba(236,72,153,0.3);margin-top:8px">
+      <div class="bottom-line-label" style="color:#EC4899">The Bottom Line</div>
+      <div class="bottom-line-text">Her body fat is <strong style="color:#22C55E">already optimal</strong>. The goal is losing visceral + subcutaneous fat while protecting the knee and ankle. With movement limited by injuries, <strong>diet does ~80% of the work</strong>. Realistic target: <strong style="color:#EC4899">5–7kg in 90 days</strong>.</div>
+    </div>
+  </div>
+
+  <!-- HER DIET -->
+  <div class="content hidden" id="her-diet">
+    <div class="section-sub"><span style="color:#EC4899">1,650 kcal</span> · <span style="color:#EC4899">~95g protein</span> · <span style="color:#EC4899">3 meals</span><br>Dinner is lighter than lunch. Keep it that way.</div>
+
+    <!-- Breakfast -->
+    <div class="accordion" style="border-left:3px solid #EC4899">
+      <button class="accordion-header" onclick="toggle(this.parentElement)">
+        <div class="accordion-header-left"><div class="acc-label" style="color:#EC4899">Breakfast</div><div class="acc-sub">Within 1–2 hrs of waking · ~400 kcal · ~30g protein</div></div>
+        <div class="acc-arrow" style="color:#EC4899">+</div>
+      </button>
+      <div class="accordion-body">
+        <div class="option-card"><div class="option-label" style="color:#EC4899">Option A</div><div class="option-item">2 whole eggs + 1 egg white</div><div class="option-item">50g bread (2 slices)</div><div class="option-item">100ml low-fat milk</div><div class="option-item">Black coffee / green tea</div></div>
+        <div class="option-card"><div class="option-label" style="color:#EC4899">Option B</div><div class="option-item">150g Greek yogurt / hung curd</div><div class="option-item">1 small fruit (apple/banana)</div><div class="option-item">1 tbsp peanut butter on bread</div><div class="option-item">Black coffee</div></div>
+        <div class="option-card"><div class="option-label" style="color:#EC4899">Option C</div><div class="option-item">75g low-fat paneer bhurji</div><div class="option-item">1 roti (40g)</div><div class="option-item">100ml milk</div><div class="option-item">Green tea</div></div>
+      </div>
+    </div>
+
+    <!-- Lunch -->
+    <div class="accordion" style="border-left:3px solid #10B981">
+      <button class="accordion-header" onclick="toggle(this.parentElement)">
+        <div class="accordion-header-left"><div class="acc-label" style="color:#10B981">Lunch</div><div class="acc-sub">Afternoon · biggest meal · ~700 kcal · ~40g protein</div></div>
+        <div class="acc-arrow" style="color:#10B981">+</div>
+      </button>
+      <div class="accordion-body">
+        <div class="option-card"><div class="option-label" style="color:#10B981">Option A (Non-Veg)</div><div class="option-item">120–150g chicken breast (grilled/boiled)</div><div class="option-item">150g cooked rice</div><div class="option-item">Big bowl salad</div><div class="option-item">100g curd</div><div class="option-item">3g ghee</div></div>
+        <div class="option-card"><div class="option-label" style="color:#10B981">Option B (Veg)</div><div class="option-item">150g dal</div><div class="option-item">100g low-fat paneer</div><div class="option-item">1–2 rotis (60g)</div><div class="option-item">Big bowl salad</div><div class="option-item">4g ghee</div></div>
+        <div class="option-card"><div class="option-label" style="color:#10B981">Option C</div><div class="option-item">80g soya chunks curry</div><div class="option-item">150g cooked rice</div><div class="option-item">100g curd</div><div class="option-item">Salad on the side</div></div>
+      </div>
+    </div>
+
+    <!-- Dinner -->
+    <div class="accordion" style="border-left:3px solid #8B5CF6">
+      <button class="accordion-header" onclick="toggle(this.parentElement)">
+        <div class="accordion-header-left"><div class="acc-label" style="color:#8B5CF6">Dinner</div><div class="acc-sub">2+ hrs before sleep · lighter · ~450 kcal · ~25g protein</div></div>
+        <div class="acc-arrow" style="color:#8B5CF6">+</div>
+      </button>
+      <div class="accordion-body">
+        <div class="option-card"><div class="option-label" style="color:#8B5CF6">Option A</div><div class="option-item">150g dal</div><div class="option-item">1–2 rotis (60g)</div><div class="option-item">100g curd</div><div class="option-item">Sabzi / veggies</div><div class="option-item">3g ghee</div></div>
+        <div class="option-card"><div class="option-label" style="color:#8B5CF6">Option B (Non-Veg)</div><div class="option-item">100g chicken</div><div class="option-item">100g cooked rice</div><div class="option-item">Mixed veggies</div><div class="option-item">100g curd</div></div>
+        <div class="option-card"><div class="option-label" style="color:#8B5CF6">Option C (Light)</div><div class="option-item">2 boiled eggs</div><div class="option-item">50g bread</div><div class="option-item">Big bowl salad</div><div class="option-item">100g Greek yogurt</div></div>
+        <div class="dessert-card"><div class="dessert-label">🍫 Dessert (pick one)</div><div class="dessert-text">25g dark chocolate · OR · 100g flavoured Greek yogurt · OR · small fruit</div></div>
+      </div>
+    </div>
+
+    <div class="totals-card" style="background:linear-gradient(135deg,#111,rgba(131,24,67,0.3));border:1px solid rgba(236,72,153,0.3)">
+      <div class="totals-label">Daily Total</div>
+      <div class="totals-val" style="color:#EC4899">~1,600–1,650 kcal</div>
+      <div class="totals-macro">Protein ~95g · Carbs ~190g · Fat ~45g</div>
+      <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#F97316;line-height:1.6">⚡ With injuries limiting movement, diet does ~80% of the work. Hitting this number daily is the most important thing.</div>
+    </div>
+  </div>
+
+  <!-- HER WORKOUT -->
+  <div class="content hidden" id="her-workout">
+    <div class="section-sub">100% floor-based · No standing · Walks 20–30 mins MAX<br><span style="color:#EC4899">3 floor sessions · 2 short walks · 2 rest days</span></div>
+    <div id="her-workout-days"></div>
+  </div>
+
+  <!-- HER RULES -->
+  <div class="content hidden" id="her-rules">
+    <div class="section-title" style="color:#EC4899">Non-Negotiables</div>
+    <div id="her-rules-list"></div>
+
+    <div class="bottom-line" style="background:#0A1A0A;border:1px solid #14532D;margin-top:4px">
+      <div class="bottom-line-label" style="color:#22C55E">🎯 When the injuries heal</div>
+      <div class="bottom-line-text">Once knee and ankle recover — add longer walks (45–60 mins) and eventually bodyweight squats. That's when fat loss will accelerate significantly. Until then, <strong>diet is doing the heavy lifting.</strong></div>
+    </div>
+
+    <div class="contract" style="background:linear-gradient(135deg,#0A0A0A,#111);border:1px solid #EC4899">
+      <div class="contract-title" style="color:#EC4899">The Contract</div>
+      <div class="contract-text">"I understand progress is not linear.<br>I will not quit when motivation dies.<br>I am building a lifestyle, not fixing a phase."</div>
+      <div class="contract-footer">90 DAYS · INJURY-SAFE · JUST RESULTS</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- DATA ----
+const himWorkout = [
+  { day:"Day 1", label:"PUSH", sub:"Chest · Shoulders · Triceps", color:"#F97316", duration:"30–40 mins", note:null,
+    exercises:[
+      {name:"Wall Push-Ups",sets:"3 × 15 reps",note:"Start here. Progress to incline push-ups week 3."},
+      {name:"Incline Push-Ups (sofa edge)",sets:"3 × 10–12 reps",note:"Once wall push-ups feel easy."},
+      {name:"Pike Push-Ups",sets:"3 × 8–10 reps",note:"Hips high, head goes toward floor. Shoulders."},
+      {name:"Floor Tricep Dips",sets:"3 × 12 reps",note:"Hands on floor behind you, bend and extend elbows."},
+      {name:"Superman Hold",sets:"3 × 10 reps (3s hold)",note:"Lie face down, lift arms + legs together."},
+      {name:"Plank",sets:"3 × 30–45 seconds",note:"On knees if needed. Build to full plank."},
+    ]},
+  { day:"Day 2", label:"WALKING", sub:"Zone 2 · Fat burning", color:"#8B5CF6", duration:"45–60 mins",
+    note:"🚶 Walking is your #1 tool for visceral fat. At your weight, 60 mins on flat ground burns 400–500 kcal with zero knee stress. Don't underestimate this day.",
+    exercises:[
+      {name:"Brisk Walk",sets:"45–60 mins",note:"Comfortable pace — you should be able to hold a conversation."},
+      {name:"Cooldown Walk",sets:"Last 10 mins slow",note:""},
+    ]},
+  { day:"Day 3", label:"LOWER BODY", sub:"Glutes & Hamstrings · Knee-Friendly", color:"#10B981", duration:"30–40 mins",
+    note:"⚠️ Zero squats, zero lunges for now. These put too much load on knees at your current weight. Glute bridges build the same muscle safely.",
+    exercises:[
+      {name:"Glute Bridges",sets:"4 × 15 reps",note:"Lie on back, feet flat, push hips up. Squeeze glutes at top."},
+      {name:"Single-Leg Glute Bridge",sets:"3 × 10 reps each",note:"Progress from above. One foot raised."},
+      {name:"Lying Hip Abduction",sets:"3 × 15 reps each side",note:"Lie on side, raise top leg. Outer glutes."},
+      {name:"Donkey Kicks",sets:"3 × 15 reps each side",note:"On all fours, kick leg back and up."},
+      {name:"Bird Dog",sets:"3 × 10 reps each side",note:"Opposite arm + leg extended. Core + glutes."},
+      {name:"Dead Bug",sets:"3 × 8 reps each side",note:"Lie on back. Slow controlled movement. Excellent core."},
+    ]},
+  { day:"Day 4", label:"REST", sub:"Active Recovery", color:"#6B7280", duration:"—",
+    note:"🛌 Rest is part of the program. Your body burns fat and builds muscle on this day.",
+    exercises:[
+      {name:"Light Walk",sets:"20–30 mins",note:"Keep NEAT up."},
+      {name:"Full Body Stretch",sets:"10–15 mins",note:"Hip flexors, chest, hamstrings on the mat."},
+    ]},
+  { day:"Day 5", label:"FULL BODY", sub:"Core Heavy Day", color:"#EF4444", duration:"35–45 mins", note:null,
+    exercises:[
+      {name:"Push-Ups (wall or incline)",sets:"3 × 12–15 reps",note:"Use your current level."},
+      {name:"Glute Bridges",sets:"3 × 15 reps",note:""},
+      {name:"Mountain Climbers (slow)",sets:"3 × 20 reps",note:"Slow and controlled. Core stays tight."},
+      {name:"Hollow Body Hold",sets:"3 × 20–30 seconds",note:"Back flat on floor, arms overhead, legs slightly raised."},
+      {name:"Plank to Downward Dog",sets:"3 × 8 reps",note:"Flow between positions. Full body."},
+      {name:"Superman Hold",sets:"3 × 10 reps",note:""},
+      {name:"Side Plank (on knee)",sets:"2 × 20 sec each side",note:"Build to full side plank."},
+    ]},
+  { day:"Day 6", label:"WALKING", sub:"Long Walk · Biggest burn day", color:"#F59E0B", duration:"60–75 mins",
+    note:"🔥 Two walking days a week = massive visceral fat reduction over 90 days. This is not optional.",
+    exercises:[
+      {name:"Long Walk",sets:"60–75 mins",note:"Go somewhere you enjoy. Music or podcast."},
+      {name:"Post-Walk Stretch",sets:"10 mins",note:"Calves, hamstrings, hip flexors on the mat."},
+    ]},
+  { day:"Day 7", label:"REST", sub:"Full Recovery", color:"#6B7280", duration:"—", note:"🛌 Sleep 8 hours. Prep meals for the week.",
+    exercises:[
+      {name:"Sleep 8–9 hours",sets:"Priority",note:"Ghrelin spikes when you don't sleep. You will overeat."},
+      {name:"Meal prep",sets:"—",note:"Boil eggs, cook chicken/soya in bulk."},
+      {name:"Optional slow walk",sets:"15–20 mins",note:""},
+    ]},
+];
+
+const herWorkout = [
+  { day:"Day 1", label:"GLUTES & HIPS", sub:"Entirely floor-based", color:"#EC4899", duration:"30–35 mins",
+    injuryNote:"🦵 All exercises lying down or on all fours. Fold a blanket under both knees when on all fours.",
+    exercises:[
+      {name:"Glute Bridges",sets:"4 × 15 reps",note:"Lie on back, feet flat, push hips up. Zero knee/ankle stress."},
+      {name:"Single-Leg Glute Bridge",sets:"3 × 10 reps each",note:"Progress from above once bridges feel easy."},
+      {name:"Clamshells",sets:"3 × 20 reps each side",note:"Lie on side, knees bent, feet together. Open top knee. Great for hip stability."},
+      {name:"Lying Hip Abduction",sets:"3 × 15 reps each side",note:"Lie on side, raise top leg slowly. No ankle pressure."},
+      {name:"Donkey Kicks",sets:"3 × 12 reps each side",note:"On all fours with blanket under knees. Stop if knee feels uncomfortable."},
+      {name:"Fire Hydrants",sets:"3 × 12 reps each side",note:"Same position. Raise leg out to side. Stop if knee hurts."},
+    ]},
+  { day:"Day 2", label:"SHORT WALK", sub:"Easy flat-ground walk only", color:"#8B5CF6", duration:"20–30 mins MAX",
+    injuryNote:"🦵🦶 Flat ground ONLY. No slopes, no stairs, no uneven surfaces. Stop immediately if ankle or knee hurts.",
+    exercises:[
+      {name:"Flat ground walk",sets:"20–30 mins",note:"Slow, comfortable pace. Not a calorie-burn session — active recovery."},
+      {name:"Post-walk ankle circles",sets:"2 × 10 each direction",note:"Seated. Gently rotate ankle. Helps mobility."},
+      {name:"Seated calf stretch",sets:"2 × 30 seconds",note:"Sit on floor, legs straight, flex foot toward you. Gentle."},
+    ]},
+  { day:"Day 3", label:"CORE & UPPER", sub:"Floor-based — back, arms, abs", color:"#F97316", duration:"30–35 mins",
+    injuryNote:"🦵 Wall push-ups involve brief standing — that's fine. No exercise that puts full body weight through the ankle.",
+    exercises:[
+      {name:"Wall Push-Ups",sets:"3 × 15 reps",note:"Standing close to wall. Minimal ankle load."},
+      {name:"Superman Hold",sets:"3 × 12 reps (2s hold)",note:"Lie face down, lift arms + legs. Completely safe."},
+      {name:"Dead Bug",sets:"3 × 8 reps each side",note:"Lie on back. Extend opposite arm and leg slowly. Lower back stays on floor."},
+      {name:"Hollow Body Hold",sets:"3 × 20 seconds",note:"Arms overhead, legs slightly raised, back flat. Core only."},
+      {name:"Floor Tricep Extension",sets:"3 × 12 reps",note:"Lie on back, arms up, bend elbows to 90°, extend back up."},
+      {name:"Plank (on knees)",sets:"3 × 30 seconds",note:"Forearms on mat, knees down. Keep back flat."},
+    ]},
+  { day:"Day 4", label:"REST", sub:"Full recovery — stay off the feet", color:"#6B7280", duration:"—",
+    injuryNote:"🛌 Priority: rest the ankle and knee. Use this day well.",
+    exercises:[
+      {name:"Sleep 8 hours",sets:"Priority",note:"Fat is lost during recovery."},
+      {name:"Gentle seated stretching",sets:"10 mins",note:"Hip flexors, neck, shoulders. No ankle/knee involvement."},
+      {name:"Ankle circles (seated)",sets:"2 × 10 each direction",note:"Gentle mobility. Do not force range of motion."},
+    ]},
+  { day:"Day 5", label:"GLUTES & CORE", sub:"Full floor session", color:"#10B981", duration:"35–40 mins",
+    injuryNote:"🦵 Most complete session of the week. Take rest between sets.",
+    exercises:[
+      {name:"Glute Bridges",sets:"4 × 15 reps",note:""},
+      {name:"Clamshells",sets:"3 × 20 reps each side",note:""},
+      {name:"Lying Hip Abduction",sets:"3 × 15 reps each side",note:""},
+      {name:"Dead Bug",sets:"3 × 8 reps each side",note:"Slow and controlled."},
+      {name:"Superman Hold",sets:"3 × 10 reps",note:""},
+      {name:"Side Plank (on knee)",sets:"2 × 20 sec each side",note:"Forearm on mat, bottom knee down."},
+      {name:"Cobra Stretch",sets:"2 × 20 seconds",note:"Lie face down, push chest up. Lower back stretch."},
+    ]},
+  { day:"Day 6", label:"SHORT WALK", sub:"Same as Day 2", color:"#F59E0B", duration:"20–30 mins MAX",
+    injuryNote:"🦶 Same rules as Day 2. Flat ground. Listen to the body.",
+    exercises:[
+      {name:"Flat ground walk",sets:"20–30 mins",note:"Easy pace. Stop if anything hurts."},
+      {name:"Post-walk mat stretch",sets:"10 mins",note:"Hip flexors, hamstrings, calves (gently)."},
+    ]},
+  { day:"Day 7", label:"REST", sub:"Full Recovery", color:"#6B7280", duration:"—",
+    injuryNote:"🛌 Both injuries need consistent rest to heal.",
+    exercises:[
+      {name:"Sleep 8 hours",sets:"Priority",note:""},
+      {name:"Meal prep (seated)",sets:"30 mins",note:"Everything can be done seated or with minimal standing."},
+    ]},
+];
+
+const himRules = [
+  "Track every meal for the first 4 weeks. Use any calorie app.",
+  "Drink 500ml water first thing every morning — your body water is LOW.",
+  "Progressive overload: add a rep or tiny bit of resistance each week. If you aren't tracking, you aren't training.",
+  "Weigh yourself once a week, same morning time. Ignore daily fluctuations.",
+  "If scale stalls for 2 weeks: drop 150 kcal and add 1,500 steps daily.",
+  "No squats or lunges until you lose 10–15kg. Protect your knees.",
+  "One bad day means nothing. Flat tyre rule — change it and drive on.",
+];
+
+const herRules = [
+  "Track your 3 meals loosely — even rough estimates help for the first 4 weeks.",
+  "500ml water first thing every morning. 1 glass before each meal.",
+  "Walks are 20–30 mins MAX on flat ground only. Stop if anything hurts.",
+  "Never push through joint pain. If it hurts — stop that exercise immediately.",
+  "Weigh yourself once a week, same morning. Ignore daily fluctuations.",
+  "Your body fat % is already optimal. This is targeted fat loss — be patient.",
+  "If scale stalls for 2 weeks: drop 100 kcal. Don't add more movement until injuries improve.",
+  "As injuries heal, gradually increase walk duration. Don't rush it.",
+];
+
+// ---- RENDER WORKOUTS ----
+function renderWorkout(days, containerId, accentFn) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = days.map((d,i) => `
+    <div class="accordion" style="border-left:3px solid ${d.color}" id="wday-${containerId}-${i}">
+      <button class="accordion-header" onclick="toggle(document.getElementById('wday-${containerId}-${i}'))">
+        <div class="accordion-header-left">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#555">${d.day}</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:${d.color};letter-spacing:1px">${d.label}</span>
+          </div>
+          <div class="acc-sub">${d.sub}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#333;margin-top:2px">${d.duration}</div>
+        </div>
+        <div class="acc-arrow" style="color:${d.color}">+</div>
+      </button>
+      <div class="accordion-body">
+        ${d.injuryNote ? `<div class="injury-note">${d.injuryNote}</div>` : ''}
+        ${d.note ? `<div class="workout-note">${d.note}</div>` : ''}
+        ${d.exercises.map(ex => `
+          <div class="exercise-row">
+            <div style="flex:1">
+              <div class="exercise-name">${ex.name}</div>
+              ${ex.note ? `<div class="exercise-note">${ex.note}</div>` : ''}
+            </div>
+            <div class="exercise-sets" style="color:${d.color};border:1px solid ${d.color}33">${ex.sets}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRules(rules, containerId, color) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = rules.map((r,i) => `
+    <div class="rule-card">
+      <div class="rule-num" style="background:${color}">${i+1}</div>
+      <div class="rule-text">${r}</div>
+    </div>
+  `).join('');
+}
+
+renderWorkout(himWorkout, 'him-workout-days', c => c);
+renderWorkout(herWorkout, 'her-workout-days', c => c);
+renderRules(himRules, 'him-rules-list', '#F97316');
+renderRules(herRules, 'her-rules-list', '#EC4899');
+
+// ---- TOGGLE ----
+function toggle(el) {
+  el.classList.toggle('open');
+}
+
+// ---- PERSON SWITCH ----
+function switchPerson(person) {
+  document.getElementById('plan-him').classList.toggle('hidden', person !== 'him');
+  document.getElementById('plan-her').classList.toggle('hidden', person !== 'her');
+  document.querySelectorAll('.person-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.person-btn.${person}`).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ---- TAB SWITCH ----
+const himTabs = ['diet','workout','progress','rules'];
+const herTabs = ['stats','diet','workout','rules'];
+
+function switchTab(person, tab) {
+  const tabs = person === 'him' ? himTabs : herTabs;
+  tabs.forEach(t => {
+    document.getElementById(`${person}-${t}`).classList.add('hidden');
+    const btn = document.getElementById(`${person}-tab-${t}`);
+    btn.classList.remove('active');
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  });
+  document.getElementById(`${person}-${tab}`).classList.remove('hidden');
+  const activeBtn = document.getElementById(`${person}-tab-${tab}`);
+  activeBtn.classList.add('active');
+  const col = person === 'him' ? '#F97316' : '#EC4899';
+  activeBtn.style.color = col;
+  activeBtn.style.borderColor = col;
+}
+</script>
+</body>
+</html>
