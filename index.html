@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="The System">
 <meta name="theme-color" content="#0A0A0A">
 <title>The System</title>
+<link rel="manifest" href="manifest.json">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
 
@@ -872,6 +873,13 @@ function switchTab(person, tab) {
   const col = person === 'him' ? '#F97316' : '#EC4899';
   activeBtn.style.color = col;
   activeBtn.style.borderColor = col;
+}
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js");
+  });
 }
 </script>
 </body>
